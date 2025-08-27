@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(ulid())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  reviews   Review[]
+  watchlist Watchlist[]
+}
+
+model Media {
+  id        String   @id @default(ulid())
+  title     String
+  type      String   // anime, movie, etc.
+  year      Int?
+  posterUrl String?
+  reviews   Review[]
+  watchlist Watchlist[]
+}
+
+model Review {
+  id        String   @id @default(ulid())
+  title     String
+  body      String
+  rating    Int
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  media     Media    @relation(fields: [mediaId], references: [id])
+  mediaId   String
+}
+
+model Watchlist {
+  id        String   @id @default(ulid())
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  media     Media    @relation(fields: [mediaId], references: [id])
+  mediaId   String
+
+  @@unique([userId, mediaId]) // prevent duplicate entries
+}
+
