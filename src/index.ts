@@ -14,11 +14,23 @@ app.route('/reviews', reviewsRoutes)
 app.route('/watchlist', watchlistRoutes)
 app.route('/viewings', viewingsRoutes)
 
+// OpenAPI JSON endpoint
+app.get('/openapi.json', (c) => c.json(openapi))
+
 // Swagger UI - must come before catch-all route
-app.get('/docs', swaggerUI({ spec: openapi, urls: [{ name: 'API', url: '/docs' }] }))
+app.get('/docs', swaggerUI({ 
+  spec: openapi, 
+  urls: [{ name: 'Watchlist API', url: '/openapi.json' }],
+  title: 'Watchlist API Documentation'
+}))
 
 // Health check - catch-all route
-app.get('/', (c) => c.json({ ok: true }))
+app.get('/', (c) => c.json({ 
+  ok: true, 
+  message: 'Watchlist API is running',
+  documentation: '/docs',
+  openapi: '/openapi.json'
+}))
 
 const port = Number(process.env.PORT || 3000)
 console.log(`Listening on http://localhost:${port}`)
