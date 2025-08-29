@@ -101,10 +101,23 @@ The API will be available at `http://localhost:3000`
 
 ### Environment Variables
 
+Create a `.env` file in the root directory with the following variables:
+
+#### Required Variables
 - `DATABASE_URL`: PostgreSQL connection string
 - `JWT_SECRET`: Secret key for JWT tokens
-- `ALLOW_REGISTER`: Set to "true" to enable user registration
+
+#### Optional Variables
 - `PORT`: Server port (default: 3000)
+- `ALLOW_REGISTER`: Set to "true" to enable user registration (default: false)
+
+#### External API Keys
+- `TMDB_API_KEY`: **Required for movies and series search** - Get from [TMDB](https://www.themoviedb.org/settings/api)
+- `ANILIST_API_KEY`: Optional - Anilist doesn't require an API key for basic usage
+
+#### Rate Limiting (Optional)
+- `RATE_LIMIT_WINDOW`: Rate limit window in milliseconds (default: 900000 = 15 minutes)
+- `RATE_LIMIT_MAX_REQUESTS`: Maximum requests per window (default: 100)
 
 ## API Usage Examples
 
@@ -139,11 +152,20 @@ curl -X GET http://localhost:3000/watchlist \
 ### Content Search
 
 ```bash
-# Search for movies
+# Search for movies (requires TMDB_API_KEY)
 curl "http://localhost:3000/viewings/search?query=inception&category=movie"
 
-# Search for anime
+# Search for series (requires TMDB_API_KEY)
+curl "http://localhost:3000/viewings/search?query=breaking+bad&category=series"
+
+# Search for anime (no API key required)
 curl "http://localhost:3000/viewings/search?query=naruto&category=anime"
+
+# Search all categories
+curl "http://localhost:3000/viewings/search?query=action&page=1"
+
+# Get detailed information about a viewing
+curl "http://localhost:3000/viewings/{viewing_id}/details"
 ```
 
 ### Reviews
@@ -165,12 +187,32 @@ curl -X POST http://localhost:3000/reviews \
 curl "http://localhost:3000/reviews?page=1&pageSize=10&category=movie"
 ```
 
+## External API Integrations
+
+### TMDB (The Movie Database)
+- **Purpose**: Movies and TV series data
+- **API Key Required**: Yes - Get from [TMDB Settings](https://www.themoviedb.org/settings/api)
+- **Features**: 
+  - Search movies and series
+  - Get detailed information
+  - Poster images
+  - Release dates and ratings
+
+### Anilist
+- **Purpose**: Anime data
+- **API Key Required**: No (free GraphQL API)
+- **Features**:
+  - Search anime by title
+  - Get detailed information
+  - Cover images
+  - Episode counts and ratings
+
 ## Database Schema
 
 The API uses Prisma with the following main entities:
 
 - **User**: Authentication and user management
-- **Viewing**: Movies, series, and anime content
+- **Viewing**: Movies, series, and anime content (with external source tracking)
 - **Watchlist**: User's watchlist items with status
 - **Review**: User reviews with ratings and text
 
@@ -191,6 +233,36 @@ Use the SwaggerUI at `/docs` to:
 - View request/response schemas
 - Authenticate with JWT tokens
 - Validate API behavior
+
+## Troubleshooting
+
+### Common Issues
+
+#### TMDB API Errors
+- **"TMDB API not configured"**: Make sure `TMDB_API_KEY` is set in your `.env` file
+- **"TMDB API error: 401"**: Your API key is invalid or expired
+- **"TMDB API error: 429"**: Rate limit exceeded, wait before making more requests
+
+#### Anilist API Errors
+- **"Anilist API error: 429"**: Rate limit exceeded, Anilist has strict rate limiting
+- **"Anilist API error: 500"**: Server error, try again later
+
+#### Database Issues
+- **"DATABASE_URL not set"**: Ensure your `.env` file contains the database connection string
+- **"Connection failed"**: Check if PostgreSQL is running and accessible
+
+### Getting API Keys
+
+1. **TMDB API Key**:
+   - Go to [TMDB](https://www.themoviedb.org/)
+   - Create an account and log in
+   - Go to Settings → API
+   - Request an API key (choose "Developer" option)
+   - Copy the API key to your `.env` file
+
+2. **Anilist API Key** (Optional):
+   - Currently not required for basic usage
+   - May be needed for future features
 
 ## Contributing
 
