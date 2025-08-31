@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken'
+import { EnvConfig } from '../config/env'
 
 const DEFAULT_EXPIRES_IN = '1h'
 
@@ -8,20 +9,12 @@ export type JwtPayload = {
   role: string
 }
 
-export function signJwt(payload: JwtPayload, expiresIn: string = DEFAULT_EXPIRES_IN): string {
-  const secret = process.env.JWT_SECRET
-  if (!secret) {
-    throw new Error('JWT_SECRET is not set')
-  }
-  return jwt.sign(payload, secret, { expiresIn })
+export function signJwt(payload: JwtPayload, config: EnvConfig, expiresIn: string = DEFAULT_EXPIRES_IN): string {
+  return jwt.sign(payload, config.JWT_SECRET, { expiresIn })
 }
 
-export function verifyJwt<T = JwtPayload>(token: string): T {
-  const secret = process.env.JWT_SECRET
-  if (!secret) {
-    throw new Error('JWT_SECRET is not set')
-  }
-  return jwt.verify(token, secret) as T
+export function verifyJwt<T = JwtPayload>(token: string, config: EnvConfig): T {
+  return jwt.verify(token, config.JWT_SECRET) as T
 }
 
 

@@ -1,13 +1,16 @@
 import 'dotenv/config';
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
+import { loadEnvConfig } from "../src/config/env";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const email = process.env.SEED_USER_EMAIL;
-  const password = process.env.SEED_USER_PASSWORD;
-  const name = process.env.SEED_USER_NAME ?? "Default User";
+  const config = loadEnvConfig();
+  
+  const email = config.SEED_USER_EMAIL;
+  const password = config.SEED_USER_PASSWORD;
+  const name = config.SEED_USER_NAME ?? "Default User";
 
   if (!email || !password) {
     throw new Error("❌ SEED_USER_EMAIL and SEED_USER_PASSWORD must be set in .env");
@@ -22,8 +25,8 @@ async function main() {
     update: {},
     create: {
       email,
-      name,
       password: hashedPassword,
+      role: 'admin',
     },
   });
 

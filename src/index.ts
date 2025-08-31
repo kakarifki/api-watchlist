@@ -1,8 +1,8 @@
 import { Hono } from 'hono'
-import authRoutes from './routes/auth'
-import reviewsRoutes from './routes/reviews'
-import watchlistRoutes from './routes/watchlist'
-import viewingsRoutes from './routes/viewings'
+import { createAuthRouter } from './routes/auth'
+import { createReviewsRouter } from './routes/reviews'
+import { createWatchlistRouter } from './routes/watchlist'
+import { createViewingsRouter } from './routes/viewings'
 import { swaggerUI } from '@hono/swagger-ui'
 import { openapi } from './routes/openapi'
 import { loadEnvConfig, validateApiKeys } from './config/env'
@@ -13,11 +13,11 @@ validateApiKeys(config)
 
 const app = new Hono()
 
-// API routes
-app.route('/auth', authRoutes)
-app.route('/reviews', reviewsRoutes)
-app.route('/watchlist', watchlistRoutes)
-app.route('/viewings', viewingsRoutes)
+// API routes with config
+app.route('/auth', createAuthRouter(config))
+app.route('/reviews', createReviewsRouter(config))
+app.route('/watchlist', createWatchlistRouter(config))
+app.route('/viewings', createViewingsRouter(config))
 
 // OpenAPI JSON endpoint
 app.get('/openapi.json', (c) => c.json(openapi))
