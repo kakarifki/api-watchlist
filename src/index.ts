@@ -1,4 +1,6 @@
 import { Hono } from 'hono'
+import { logger } from 'hono/logger'
+import { cors } from 'hono/cors'
 import { createAuthRouter } from './routes/auth'
 import { createReviewsRouter } from './routes/reviews'
 import { createWatchlistRouter } from './routes/watchlist'
@@ -12,6 +14,10 @@ const config = loadEnvConfig()
 validateApiKeys(config)
 
 const app = new Hono()
+
+// Global middleware
+app.use('*', logger())
+app.use('*', cors())
 
 // API routes with config
 app.route('/auth', createAuthRouter(config))
@@ -40,6 +46,12 @@ app.get('/', (c) => c.json({
     anilist: true // Anilist doesn't require API key
   }
 }))
+
+// Global error handler
+app.onError((err, c) => {
+  console.error('Unhandled error:', err)
+  return c.json({ message: 'Internal server error' }, 500)
+})
 
 console.log(`🚀 Watchlist API starting...`)
 console.log(`📊 External APIs: TMDB ${config.TMDB_API_KEY ? '✅' : '❌'}, Anilist ✅`)

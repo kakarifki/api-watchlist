@@ -18,53 +18,68 @@ export function createReviewsRouter(config: EnvConfig) {
   const authMiddleware = createAuthMiddleware(config)
 
   router.post('/', authMiddleware, async (c) => {
-    const user = c.get('user') as { sub: string }
-    const body = await c.req.json()
-    const parsed = createSchema.safeParse(body)
-    if (!parsed.success) return c.json({ message: 'Invalid input' }, 400)
+    try {
+      const user = c.get('user') as { sub: string }
+      const body = await c.req.json()
+      const parsed = createSchema.safeParse(body)
+      if (!parsed.success) return c.json({ message: 'Invalid input' }, 400)
 
-    const { viewingId, ratingPlot, ratingCharacter, ratingWorld, textReview } = parsed.data
-    const ratingOverall = Math.round((ratingPlot + ratingCharacter + ratingWorld) / 3)
-    const slug = generateSlug(textReview.slice(0, 24) || 'review')
+      const { viewingId, ratingPlot, ratingCharacter, ratingWorld, textReview } = parsed.data
+      const ratingOverall = Math.round((ratingPlot + ratingCharacter + ratingWorld) / 3)
+      const slug = generateSlug(textReview.slice(0, 24) || 'review')
 
-    const created = await prisma.review.create({
-      data: {
-        userId: user.sub,
-        viewingId,
-        ratingPlot,
-        ratingCharacter,
-        ratingWorld,
-        ratingOverall,
-        textReview,
-        slug,
-      },
-    })
-    return c.json({ id: created.id, slug: created.slug })
+      const created = await prisma.review.create({
+        data: {
+          userId: user.sub,
+          viewingId,
+          ratingPlot,
+          ratingCharacter,
+          ratingWorld,
+          ratingOverall,
+          textReview,
+          slug,
+        },
+      })
+      return c.json({ id: created.id, slug: created.slug })
+    } catch (error) {
+      console.error('Review creation error:', error)
+      return c.json({ message: 'Internal server error' }, 500)
+    }
   })
 
   router.get('/', async (c) => {
-    const page = Number(c.req.query('page') || '1')
-    const pageSize = Math.min(Number(c.req.query('pageSize') || '10'), 50)
-    const category = c.req.query('category') as 'movie' | 'series' | 'anime' | undefined
-    const where = category ? { viewing: { category } } : {}
-    const [items, total] = await Promise.all([
-      prisma.review.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-        include: { viewing: true, user: { select: { id: true, email: true } } },
-      }),
-      prisma.review.count({ where }),
-    ])
-    return c.json({ items, page, pageSize, total })
+    try {
+      const page = Number(c.req.query('page') || '1')
+      const pageSize = Math.min(Number(c.req.query('pageSize') || '10'), 50)
+      const category = c.req.query('category') as 'movie' | 'series' | 'anime' | undefined
+      const where = category ? { viewing: { category } } : {}
+      const [items, total] = await Promise.all([
+        prisma.review.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+          include: { viewing: true, user: { select: { id: true, email: true } } },
+        }),
+        prisma.review.count({ where }),
+      ])
+      return c.json({ items, page, pageSize, total })
+    } catch (error) {
+      console.error('Reviews fetch error:', error)
+      return c.json({ message: 'Internal server error' }, 500)
+    }
   })
 
   router.get('/:slug', async (c) => {
-    const slug = c.req.param('slug')
-    const review = await prisma.review.findUnique({ where: { slug }, include: { viewing: true, user: { select: { id: true, email: true } } } })
-    if (!review) return c.json({ message: 'Not found' }, 404)
-    return c.json(review)
+    try {
+      const slug = c.req.param('slug')
+      const review = await prisma.review.findUnique({ where: { slug }, include: { viewing: true, user: { select: { id: true, email: true } } } })
+      if (!review) return c.json({ message: 'Not found' }, 404)
+      return c.json(review)
+    } catch (error) {
+      console.error('Review fetch error:', error)
+      return c.json({ message: 'Internal server error' }, 500)
+    }
   })
 
   return router

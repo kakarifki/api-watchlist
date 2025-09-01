@@ -5,8 +5,6 @@ import * as bcrypt from 'bcryptjs'
 import { signJwt } from '../utils/jwt'
 import { EnvConfig } from '../config/env'
 
-const router = new Hono()
-
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
@@ -57,7 +55,5 @@ export function createAuthRouter(config: EnvConfig) {
 
   return authRouter
 }
-
-export default router
 
 
