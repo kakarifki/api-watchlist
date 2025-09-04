@@ -2,6 +2,9 @@ import { Handler } from '@netlify/functions'
 import app from '../../src/index'
 import { disconnectPrisma } from '../../src/db'
 
+// Ensure Prisma can find its generated files in production
+process.env.NODE_ENV === 'production' && (process.env.PRISMA_GENERATED_PATH = './generated/prisma')
+
 // Create a Netlify serverless function handler
 export const handler: Handler = async (event, context) => {
   // Convert Netlify event to Request object for Hono

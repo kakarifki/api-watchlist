@@ -1,4 +1,14 @@
-import { PrismaClient } from './generated/prisma'
+// Import PrismaClient from the correct location based on environment
+let PrismaClient;
+try {
+  // In production, the path might be different due to how Netlify bundles functions
+  const generatedPath = process.env.PRISMA_GENERATED_PATH || './generated/prisma';
+  PrismaClient = require(generatedPath).PrismaClient;
+} catch (error) {
+  // Fallback to the default path
+  console.warn('Failed to import PrismaClient from custom path, using default path');
+  PrismaClient = require('./generated/prisma').PrismaClient;
+}
 
 // PrismaClient is attached to the `global` object in development to prevent
 // exhausting your database connection limit.
