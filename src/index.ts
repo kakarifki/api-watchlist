@@ -53,16 +53,14 @@ app.onError((err, c) => {
   return c.json({ message: 'Internal server error' }, 500)
 })
 
-console.log(`🚀 Watchlist API starting...`)
-console.log(`📊 External APIs: TMDB ${config.TMDB_API_KEY ? '✅' : '❌'}, Anilist ✅`)
+// Only log when not in production (Netlify functions)
+if (process.env.NODE_ENV !== 'production') {
+  console.log(`🚀 Watchlist API starting...`)
+  console.log(`📊 External APIs: TMDB ${config.TMDB_API_KEY ? '✅' : '❌'}, Anilist ✅`)
+  console.log(`📚 API Documentation available at /docs`)
+}
 
-// Use Bun's native serve
-Bun.serve({
-  port: config.PORT,
-  fetch: app.fetch,
-})
-
-console.log(`🌐 Server listening on http://localhost:${config.PORT}`)
-console.log(`📚 API Documentation: http://localhost:${config.PORT}/docs`)
+// Server initialization is handled by Netlify in production
+// or by netlify dev command in development
 
 export default app
