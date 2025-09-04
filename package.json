@@ -1,15 +1,14 @@
 {
   "name": "api-watchlist",
   "scripts": {
-    "dev": "netlify dev",
-    "build": "tsc && npm run generate && npm run postbuild",
-    "postbuild": "cp -r src/generated netlify/functions/",
-    "generate": "prisma generate",
-    "migrate:dev": "prisma migrate dev",
-    "migrate:deploy": "prisma migrate deploy",
-    "seed": "node prisma/seed.js",
-    "start": "netlify dev"
-  },
+  "dev": "netlify dev",
+  "build": "tsc && prisma generate",
+  "generate": "prisma generate",
+  "migrate:dev": "prisma migrate dev",
+  "migrate:deploy": "prisma migrate deploy",
+  "seed": "node prisma/seed.js",
+  "start": "netlify dev"
+},
   "prisma": {
     "seed": "bun run prisma/seed.ts"
   },
