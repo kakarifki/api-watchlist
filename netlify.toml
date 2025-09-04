@@ -1,6 +1,5 @@
 [build]
   command = "npm run build"
-  publish = "public"
   functions = "netlify/functions"
 
 [dev]
@@ -19,5 +18,3 @@
 
 [build.environment]
   NODE_VERSION = "18"
-  NPM_FLAGS = "--legacy-peer-deps"
-  NETLIFY_USE_YARN = "false"
